@@ -1,0 +1,36 @@
+---
+title: "Slutpriser på ettor i Stockholms innerstad"
+author: "Erik Johannesen"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+```{r, fig.cap="Bildkälla: Holger Ellgaard / Wikimedia commons", out.width="100%", echo=FALSE}
+knitr::include_graphics("799px-Stockholm_från_Kungsholmen_2009.jpg")
+```
+
+Ett API (Application Programming Interface) är ett gränssnitt som gör det möjligt att kommunicera med en resurs, till exempel en databas. Bostadssajten [Booli](https://www.booli.se/) har ett [öppet API](https://www.booli.se/p/api/) där man kan söka efter och hämta deras listade bostäder till salu och slutpriser. Vi har hämtat alla ettor i Stockholms innerstad med slutpris, mer än 14000 objekt från 2012 till 2021. Det finns säkerligen mängder med felaktigheter i data, men dessa bortser vi ifrån här.
+
+Först läser vi in hela tabellen i R och skapar en översikt av innehållet.
+
+```{r}
+library(tidyverse)
+booli_ettor <- read_csv("data/booli_ettor_2022-05-19.csv")
+glimpse(booli_ettor)
+```
+
+Sedan illustrerar vi prisutvecklingen genom att plotta priser per kvadratmeter mot säljdatum tillsammans med en trendlinje.
+
+```{r, fig.align='center'}
+ggplot(data = booli_ettor, 
+       mapping = aes(x = soldDate, y = soldPrice / livingArea)) +
+  geom_point(alpha = .1) +
+  geom_smooth(se = FALSE, color = "steelblue") +
+  ylab("Pris per kvadratmeter") + xlab("") +
+  scale_y_continuous(expand = expansion(mult = c(0, .05)), limits = c(0, NA)) +
+  ggtitle("Pris per kvadratmeter på ettor sålda i Stockholms innerstad enligt Booli") +
+  theme_bw()
+```
